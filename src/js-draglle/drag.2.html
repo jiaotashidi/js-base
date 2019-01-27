@@ -1,0 +1,98 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    #box {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      /* top: 100px;
+      left: 100px; */
+      /* top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      margin: auto; */
+      /* top: 50%;
+      left: 50%;
+      margin-top: -50px;
+      margin-left: -50px; */
+      background: lightcoral;
+      cursor: move;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="box"></div>
+  <script>
+    function processThis(obj, fn) {
+      return function (e) {
+        fn.call(obj, e)
+      }
+    }
+    // 每一个单独的行为，都是以来一个主体的
+    // 面向对象的风格拖拽
+    function Drag(ele) {
+      console.info(ele)
+      this.x = null;
+      this.y = null;
+      this.mx = null;
+      this.my = null;
+      this.ele = ele;
+      this.DOWN = processThis(this, this.down)
+      this.MOVE = processThis(this, this.move)
+      this.UP = processThis(this, this.up)
+      on(this.ele, 'mousedown', this.DOWN)
+    }
+    function on(ele, event, fn){
+      ele.addEventListener(event,fn)
+    }
+    Drag.prototype.down = function(e){
+      console.info('down')
+      console.info(this)
+      this.x = this.ele.offsetLeft;
+      this.y = this.ele.offsetTop;
+      this.mx = e.pageX;
+      this.my = e.pageY;
+      console.info(this.x, this.y)
+      if(this.ele.setCapture){
+        this.ele.setCapture()
+        on(this.ele, 'mousemove',this.MOVE)
+        on(this.ele, 'mouseup', this.UP)
+      }else{
+        on(document, 'mousemove', this.MOVE)
+        on(document, 'mouseup', this.UP)
+      }
+    }
+    Drag.prototype.move = function(e){
+      this.ele.style.left = e.pageX - this.mx +this.x;
+      this.ele.style.top = e.pageY - this.my + this.y;
+    }
+    Drag.prototype.up = function(e){
+      if(this.ele.releaseCapture){
+        this.ele.releaseCapture();
+        off(this.ele, 'mousemove', this.MOVE);
+        off(this.ele, 'mouseup', this.UP)
+      }else{
+        off(document, 'mousemove', this.MOVE);
+        off(document, 'mouseup', this.UP);
+      }
+    }
+    function off(ele,event,fn){
+      ele.removeEventListener(event,fn)
+    }
+    new Drag(box)
+  </script>
+</body>
+
+</html>

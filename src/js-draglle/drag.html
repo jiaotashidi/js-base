@@ -1,0 +1,97 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    div {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      background: red;
+      cursor: move;
+      user-select: none;
+    }
+
+    #div2 {
+      top: 120px;
+      left: 100px;
+      background: yellow;
+    }
+
+    #div3 {
+      top: 60px;
+      left: 170px;
+      background: green
+    }
+  </style>
+</head>
+
+<body>
+  <div id="div1"></div>
+  <div id="div2"></div>
+  <div id="div3"></div>
+  <script>
+    let oDiv1 = document.getElementById('div1')
+    let oDiv2 = document.getElementById('div2')
+    let oDiv3 = document.getElementById('div3')
+    var zIndex = 1;
+    function processThis(obj, fn) {
+      return function (e) {
+        fn.call(obj, e)
+      }
+    }
+    function down(e) {
+      // 1: 记录盒子的位置 top left
+      this.x = this.offsetLeft;
+      this.y = this.offsetTop;
+      // 2: 记录鼠标的起始位置
+      this.mx = e.pageX; // 这里不用clientX clientY 因为他们旨在一屏里展示
+      // 滚动的话获取的就会有问题
+      this.my = e.pageY;
+      console.info(this.x, this.y)
+      // 3: 根据情况来绑定事件
+      if (this.setCapture) {
+        this.setCapture();
+        on(this, 'mousemove', move)
+        on(this, 'mouseup', up)
+      } else {
+        this.MOVE = processThis(this, down)
+        this.UP = processThis(this, up)
+        on(document, 'mousemove', this.MOVE)
+        on(document, 'mouseup', this.UP)
+      }
+      e.preventDefault()
+      this.style.zIndex = ++zIndex;
+    }
+    function move(e) {
+      this.style.left = this.x + (e.pageX - this.mx) + 'px'
+      this.style.top = this.y + (e.pageY - this.my) + 'px'
+    }
+    function up(e) {
+      if (this.releaseCapture) {
+        this.releaseCapture();
+        off(this, 'mousemove',move)
+        off(this, 'mouseup',up)
+      }else{
+        off(document, 'mousemove',this.MOVE)
+        off(document, 'mouseup',this.UP)
+      }
+    }
+    function on(el, event, fn) {
+      el.addEventListener(event,fn)
+    }
+    function off(el, event, fn){
+      el.removeEventListener(event, fn)
+    }
+    on(oDiv1, 'mousedown', down)
+    var eles = document.getElementsByTagName('div')
+    for(var i =0; i< eles.length; i++){
+      on(eles[i],'mousedown',down)
+    }
+  </script>
+</body>
+
+</html>

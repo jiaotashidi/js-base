@@ -1,0 +1,89 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+    }
+    #box{
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      top:100px;
+      left: 100px;
+      /* top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      margin: auto; */
+      /* top: 50%;
+      left: 50%;
+      margin-top: -50px;
+      margin-left: -50px; */
+      background: lightcoral;
+      cursor: move;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="box"></div>
+  <script>
+    // mousedown  mousemove mouseup
+    // mousedown 的时候绑定move方法 和 up
+    // up 的时候， 移除事件
+    // 1: 拖拽原理 当鼠标在盒子上按下的时候，开始拖拽 给盒子绑定move和up事件
+    // 2: 当鼠标移动的时候，我们计算盒子的最新位置
+    // 3: 当鼠标抬起的时候，说明拖拽已经结束了，我们的move和up就没用了，我们再把这2个方法移除
+    var box = document.getElementById('box')
+    box.style.top = ((document.documentElement.clientHeight || document.body.clientHeight) - box.offsetHeight)/2 +'px';
+    box.style.left =  ((document.documentElement.clientWidth || document.body.clientWidth) - box.offsetWidth)/2 +'px';
+    function down(e){
+      e = e || window.event
+      // 鼠标的起始位置
+      this.strX =  e.clientX;
+      this.strY =  e.clientY;
+      // box 位置
+      this.strL = parseFloat(this.style.left)
+      this.strT = parseFloat(this.style.top)
+      // this.strT = this.offsetTop;
+      // this.strL = this.offsetLeft;
+      console.info(this.offsetLeft,this.offsetTop)
+      // 给元素绑定 移动和抬起的事件
+      this.onmousemove = move
+      this.onmouseup = up
+    }
+    // 拖拽的位置计算： 鼠标移动的位置 就是盒子移动的位置
+    // down 记录鼠标开始位置 和盒子的开始位置
+    // 鼠标移动的时候，获取心的鼠标位置， 用现有的位置 - 起始位置
+    function move(e){
+      console.info(this)
+      e = e || window.event
+      // 获取鼠标当前位置
+      // e.clientX - this.strX // 鼠标移动距离
+      var curL = (e.clientX - this.strX) + this.strL
+      var curT = (e.clientY - this.strY) + this.strT
+
+      // 边界处理
+      var minL = 0, minT = 0,maxL = (document.documentElement.clientWidth || document.body.clientWidth) - this.offsetWidth;
+      maxT = (document.documentElement.clientHeight || document.body.clientHeight) - this.offsetHeight;
+      curL = curL<minL ? minL : curL > maxL ? maxL: curL;
+      curT = curT<minT ? minT: curT>maxT ? maxT : curT
+
+      this.style.top = curT + 'px'
+      this.style.left = curL + 'px'
+    }
+    function up(e){
+      this.onmousemove = null;
+      this.onmouseup = null;
+    }
+    box.onmousedown = down
+  </script>
+</body>
+
+</html>
